@@ -15,6 +15,7 @@
     "@google/model-viewer": "^4.1.0",
     "@webspatial/core-sdk": "^1.0.4",
     "@webspatial/react-sdk": "^1.0.4",
+    "jspdf": "^3.0.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "three": "^0.172.0"

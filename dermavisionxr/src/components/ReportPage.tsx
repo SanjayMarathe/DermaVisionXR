@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import jsPDF from "jspdf";
 
 interface AgentResponse {
     role: string;
@@ -73,6 +74,125 @@ export function ReportPage({ consultationData, onBack }: ReportPageProps) {
         { border: '#f59e0b', glow: 'rgba(245, 158, 11, 0.3)', neon: '#f59e0b' },
     ];
 
+    const generatePDF = () => {
+        const pdf = new jsPDF();
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 20;
+        let yPos = margin;
+
+        // Title
+        pdf.setFontSize(24);
+        pdf.setTextColor(0, 194, 255);
+        pdf.text("DermaVisionXR", margin, yPos);
+        yPos += 10;
+
+        pdf.setFontSize(18);
+        pdf.setTextColor(168, 85, 247);
+        pdf.text("Multi-Specialist Consultation Report", margin, yPos);
+        yPos += 15;
+
+        // Date and processing time
+        pdf.setFontSize(10);
+        pdf.setTextColor(128, 128, 128);
+        pdf.text(`Generated: ${new Date().toLocaleString()}`, margin, yPos);
+        yPos += 5;
+        pdf.text(`Processing Time: ${(processingTime / 1000).toFixed(1)}s`, margin, yPos);
+        yPos += 10;
+
+        // Consensus Section
+        pdf.setFontSize(16);
+        pdf.setTextColor(0, 194, 255);
+        pdf.text("Consensus Diagnosis", margin, yPos);
+        yPos += 8;
+
+        pdf.setFontSize(12);
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(`Diagnosis: ${consensus.diagnosis}`, margin, yPos);
+        yPos += 7;
+        pdf.text(`Confidence: ${consensus.confidence}%`, margin, yPos);
+        yPos += 7;
+        pdf.text(`Agreement Score: ${agreementScore}%`, margin, yPos);
+        yPos += 7;
+        pdf.text(`Urgency: ${urgency.label}`, margin, yPos);
+        yPos += 10;
+
+        pdf.setFontSize(10);
+        const summaryLines = pdf.splitTextToSize(consensus.summary, pageWidth - 2 * margin);
+        pdf.text(summaryLines, margin, yPos);
+        yPos += summaryLines.length * 5 + 10;
+
+        // Specialists
+        specialists.forEach((agent) => {
+            if (yPos > pageHeight - 60) {
+                pdf.addPage();
+                yPos = margin;
+            }
+
+            pdf.setFontSize(14);
+            pdf.setTextColor(0, 0, 0);
+            pdf.text(`${agent.name} - ${agent.role}`, margin, yPos);
+            yPos += 7;
+
+            pdf.setFontSize(10);
+            pdf.setTextColor(100, 100, 100);
+            pdf.text(`Confidence: ${agent.confidence}%`, margin, yPos);
+            yPos += 7;
+
+            pdf.setFontSize(10);
+            pdf.setTextColor(0, 0, 0);
+            const assessmentLines = pdf.splitTextToSize(`Assessment: ${agent.assessment}`, pageWidth - 2 * margin);
+            pdf.text(assessmentLines, margin, yPos);
+            yPos += assessmentLines.length * 5 + 5;
+
+            if (agent.keyFindings.length > 0) {
+                pdf.text("Key Findings:", margin, yPos);
+                yPos += 5;
+                agent.keyFindings.forEach(finding => {
+                    if (yPos > pageHeight - 20) {
+                        pdf.addPage();
+                        yPos = margin;
+                    }
+                    const findingLines = pdf.splitTextToSize(`• ${finding}`, pageWidth - 2 * margin - 5);
+                    pdf.text(findingLines, margin + 5, yPos);
+                    yPos += findingLines.length * 5;
+                });
+                yPos += 5;
+            }
+
+            if (agent.recommendations.length > 0) {
+                pdf.text("Recommendations:", margin, yPos);
+                yPos += 5;
+                agent.recommendations.forEach(rec => {
+                    if (yPos > pageHeight - 20) {
+                        pdf.addPage();
+                        yPos = margin;
+                    }
+                    const recLines = pdf.splitTextToSize(`• ${rec}`, pageWidth - 2 * margin - 5);
+                    pdf.text(recLines, margin + 5, yPos);
+                    yPos += recLines.length * 5;
+                });
+                yPos += 5;
+            }
+
+            yPos += 5;
+        });
+
+        // Disclaimer
+        if (yPos > pageHeight - 40) {
+            pdf.addPage();
+            yPos = margin;
+        }
+        pdf.setFontSize(8);
+        pdf.setTextColor(128, 128, 128);
+        const disclaimer = "Medical Disclaimer: This AI-powered analysis is for informational purposes only and does not constitute medical advice. Always consult a qualified healthcare provider for diagnosis, treatment, or medical decisions.";
+        const disclaimerLines = pdf.splitTextToSize(disclaimer, pageWidth - 2 * margin);
+        pdf.text(disclaimerLines, margin, yPos);
+
+        // Save PDF
+        pdf.save(`DermaVisionXR_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    };
+
     return (
         <div style={{
             minHeight: '100vh',
@@ -135,7 +255,8 @@ export function ReportPage({ consultationData, onBack }: ReportPageProps) {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '3rem'
+                    marginBottom: '3rem',
+                    gap: '1rem'
                 }}>
                     <button
                         onClick={onBack}
@@ -163,15 +284,48 @@ export function ReportPage({ consultationData, onBack }: ReportPageProps) {
                     >
                         ← Back to Scan
                     </button>
-                    <div style={{
-                        fontSize: '0.9rem',
-                        color: '#888',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '8px',
-                        border: '1px solid rgba(255, 255, 255, 0.1)'
-                    }}>
-                        ⏱️ {(processingTime / 1000).toFixed(1)}s
+                    
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <button
+                            onClick={generatePDF}
+                            style={{
+                                background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
+                                border: 'none',
+                                color: '#fff',
+                                padding: '0.75rem 1.5rem',
+                                borderRadius: '12px',
+                                cursor: 'pointer',
+                                fontSize: '0.95rem',
+                                fontWeight: '600',
+                                transition: 'all 0.3s ease',
+                                backdropFilter: 'blur(10px)',
+                                boxShadow: '0 4px 15px rgba(168, 85, 247, 0.4)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 6px 20px rgba(168, 85, 247, 0.6)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 4px 15px rgba(168, 85, 247, 0.4)';
+                            }}
+                        >
+                            📄 Save as PDF
+                        </button>
+                        
+                        <div style={{
+                            fontSize: '0.9rem',
+                            color: '#888',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(255, 255, 255, 0.1)'
+                        }}>
+                            ⏱️ {(processingTime / 1000).toFixed(1)}s
+                        </div>
                     </div>
                 </div>
 
