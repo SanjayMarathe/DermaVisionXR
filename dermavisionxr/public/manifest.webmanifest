@@ -1,0 +1,13 @@
+{
+  "name": "DermaVision - Spatial Dermatoscopic Analysis",
+  "short_name": "DermaVision",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "xr_main_scene": {
+    "default_size": {
+      "width": 1400,
+      "height": 900
+    }
+  }
+}

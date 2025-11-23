@@ -1,0 +1,145 @@
+:root {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(135deg, #0a0015 0%, #1a0033 50%, #0f0520 100%);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Futuristic Purple Theme */
+  --color-primary: #a855f7; /* Purple 500 */
+  --color-primary-hover: #9333ea; /* Purple 600 */
+  --color-secondary: #c084fc; /* Purple 400 */
+  --color-accent: #e879f9; /* Fuchsia 400 */
+  --color-glow: #d946ef; /* Fuchsia 500 */
+  --color-surface: rgba(88, 28, 135, 0.15); /* Purple with opacity */
+  --color-surface-light: rgba(124, 58, 237, 0.2);
+  
+  --glass-border: 1px solid rgba(168, 85, 247, 0.3);
+  --glass-shadow: 0 8px 32px rgba(168, 85, 247, 0.2);
+  --glass-backdrop: blur(16px);
+  --glow-shadow: 0 0 20px rgba(168, 85, 247, 0.6), 0 0 40px rgba(168, 85, 247, 0.4);
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0015 0%, #1a0033 50%, #0f0520 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(217, 70, 239, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  animation: pulse-glow 8s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Utilities */
+.glass-panel {
+  background: var(--color-surface);
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 16px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -10px var(--color-primary);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent), var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+  text-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Spatial Mode Styles */
+html.is-spatial {
+  background-color: transparent;
+  --xr-background-material: transparent;
+}
+
+html.is-spatial body {
+  background: transparent;
+}
+
+html.is-spatial .glass-panel {
+  --xr-background-material: thick;
+}
+
+html.is-spatial .btn-primary {
+  --xr-background-material: translucent;
+  position: relative;
+}
+
+html.is-spatial .glass-panel-dark {
+  --xr-background-material: thick;
+}
